@@ -42,11 +42,18 @@ def load_ratings(session):
     # use u.data
     with open('seed_data/u.data', 'rb') as csvfile:
     #establish a variable that creates a parsed line
-        ratings_file = csv.reader(csvfile, delimiter = ' ')
+        ratings_file = csv.reader(csvfile, delimiter = '\t')
     #iterate over the list
         for row in ratings_file:
+            #print row
         #establish what the output should look like
-            row = model.Rating(id=row[0], movie_id=row[1], rating=[2])
+            rating = model.Rating( 
+                movie_id=int(row[1]), 
+                user_id=int(row[0]), 
+                rating=int(row[2]))
+            session.add(rating)
+
+    session.commit()
     
 
 def main(session):
