@@ -1,5 +1,6 @@
 import model
 import csv
+import datetime
 
 def load_users(session):
     with open('seed_data/u.user', 'rb') as csvfile:
@@ -7,7 +8,6 @@ def load_users(session):
         user_file = csv.reader(csvfile, delimiter='|')
         #iterate over the list
         for row in user_file:
-            print row
             #establish what the output should look like
             # user = model.User(id=row[0], email=row[1], password=row[2], age=row[1], zipcode=row[4])
             user = model.User(id=row[0], age=row[1], zipcode=row[2])
@@ -24,10 +24,14 @@ def load_movies(session):
         #iterate over the list
         for row in movie_file:
             #use strptime on release_date
-            release_date = date.date.strptime(release_date, "%d-%b-%Y")
+            if not row[2]:
+                continue
+            release_date = datetime.datetime.strptime(row[2], "%d-%b-%Y")
             #establish what the output should look like
-            movie = model.Movie(id=row[0], title=row[1], release_date=row[2], imdb_url=row[3])
-            print movie
+            movie = model.Movie(id=row[0], 
+                                title=unicode(row[1], errors='replace'), 
+                                release_date=release_date, 
+                                imdb=unicode(row[3], errors='replace'))
             #add that output to the database
             session.add(movie)
 
@@ -47,8 +51,8 @@ def load_ratings(session):
 
 def main(session):
     #load_users(session)
-    load_movies(session)
-    #load_ratings(session)
+    #load_movies(session)
+    load_ratings(session)
     # You'll call each of the load_* functions with the session as an argument
    
 
