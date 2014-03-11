@@ -1,23 +1,23 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, backref
+
+	
+
+ENGINE = create_engine("sqlite:///ratings.db", echo=False) 
+session = scoped_session(sessionmaker(bind=ENGINE,
+                                      autocommit = False,
+                                      autoflush = False))
 
 
-
-ENGINE = None
-Session = None
-
-def connect():
-	global ENGINE
-	global Session
-
-	ENGINE = create_engine("sqlite:///ratings.db", echo=True) 
-	Session = sessionmaker(bind=ENGINE)
-
-	return Session()
 
 Base = declarative_base()
+Base.query = session.query_property()
+
+
 
 class User(Base):
     __tablename__ = "users"
@@ -37,15 +37,18 @@ class Movie(Base):
 	id = Column(Integer, primary_key=True)
 	title = Column(String(64), nullable=True)
 	release_date = Column(Date, nullable=True)
-	imdb_url = Column(String(64), nullable=True)
+	imdb = Column(String(64), nullable=True)
 
 class Rating(Base):
 	__tablename__ = "ratings"
 
 	id = Column(Integer, primary_key=True)
-	movie_id = Column(Integer)
+	movie_id = Column(Integer, nullable=True)
 	user_id = Column(Integer, ForeignKey('users.id'))
-	rating = Column(Integer)
+	rating = Column(Integer, nullable=True)
+
+	user = relationship("User",
+            backref=backref("ratings", order_by=id))
 
 ### End class declarations
 
